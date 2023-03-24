@@ -15,14 +15,15 @@ let generateCartItems = () => {
       .map((x) => {
         let { id, item } = x;
         let search = shopItemsData.find((y) => y.id === id) || [];
+        let {img,name,price} = search
         return `
             <div class="cart-item">
-            <img width=100 src=${search.img} alt="">
+            <img width=100 src=${img} alt="">
             <div class="details">
             <div class="title-price-x">
             <h4 class="title-price">
-            <p>${search.name}</p>
-            <p class="cart-item-price">$${search.price}</p>
+            <p>${name}</p>
+            <p class="cart-item-price">$${price}</p>
             </h4>
             <i onclick="removeItem(${id})" class="bi bi-x-lg"></i>
             </div>
@@ -84,8 +85,9 @@ let decrement = (id)=>{
     // console.log(basket)
     update(selectedItem.id)
     basket = basket.filter((x)=>x.item!==0)
-    generateCartItems();
+    
     localStorage.setItem("data",JSON.stringify(basket))
+    generateCartItems();
     
 }
 
@@ -96,6 +98,7 @@ let update = (id)=>{
     // console.log(search.item)
     
     calculation(search.item)
+    totalAmount()
 }
 
 
@@ -104,6 +107,36 @@ let removeItem =(id)=>{
     let selectedItem = id
     // console.log(selectedItem.id)
     basket = basket.filter((x)=>x.id!==selectedItem.id)
-    localStorage.setItem("data",JSON.stringify(basket))
     generateCartItems();
+    totalAmount()
+    calculation()
+    localStorage.setItem("data",JSON.stringify(basket))
 }
+
+let clearCart = ()=>{
+    basket=[]
+    generateCartItems()
+    calculation()
+    localStorage.setItem("data",JSON.stringify(basket))
+}
+
+
+
+let totalAmount = ()=>{
+    if(basket.length !== 0){
+        let amount = basket.map((x)=>{
+            let {item,id} = x
+            let search = shopItemsData.find((y) => y.id === id) || [];
+            return item * search.price
+
+        }).reduce((total,y)=>total + y,0)
+        // console.log(amount)
+        label.innerHTML = `
+        <h2>Total Bill: $ ${amount}</h2>
+        <button class="checkout">Checkout</button>
+        <button class="removeAll" onclick = "clearCart()">Clear</button>
+        `
+    }   else return 
+}
+
+totalAmount()
